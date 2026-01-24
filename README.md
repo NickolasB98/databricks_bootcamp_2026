@@ -41,6 +41,7 @@ script/
     gold_dim_products.ipynb
     gold_fact_sales.ipynb
     gold_orchestration.ipynb
+
 datasets/
   engineering/
     source_crm/
