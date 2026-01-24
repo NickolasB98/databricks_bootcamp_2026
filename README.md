@@ -9,6 +9,11 @@ This project demonstrates how to combine data engineering, analytics, and applie
 
 [Gold Business Dashboard 2026-01-24 22_58.pdf](https://github.com/user-attachments/files/24840502/Gold.Business.Dashboard.2026-01-24.22_58.pdf)
 
+<img width="2522" height="1604" alt="image" src="https://github.com/user-attachments/assets/3494f29d-49f1-4f9b-8c25-57882f3c9316" />
+
+<img width="2542" height="1120" alt="image" src="https://github.com/user-attachments/assets/9481f284-d5a3-41f6-8260-9e5387cd410e" />
+
+
 ---
 
 ## 1. Repository Structure
