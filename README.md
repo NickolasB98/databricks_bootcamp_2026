@@ -192,7 +192,7 @@ To enable natural-language access for business users, the project also includes 
 
 ### 7. About
 
-Built by Nikolas Biniaris as a combined project for the Databricks Data Engineering and Data Analytics bootcamps, focusing on practical lakehouse architecture, SQL, and analytics for sales data.
+Built by Nikolas Biniaris as a combined project for the Databricks Data Engineering and Data Analytics bootcamps, organised by Data with Baara, focusing on practical databricks lakehouse architecture, SQL, and analytics.
 
 ---
 
