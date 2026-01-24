@@ -150,6 +150,8 @@ Optimized for BI tools and ad‑hoc analytics.
 
 ## 5. Jobs Orchestration
 
+<img width="2440" height="1348" alt="image" src="https://github.com/user-attachments/assets/1ccdbe20-b4e4-4300-97fb-eed6e2b3456f" />
+
 The full pipeline is orchestrated with a Databricks Job:
 
 - **Bronze task**  
@@ -173,6 +175,8 @@ The Job runs these tasks in sequence: **Bronze → Silver → Gold → Sales_Das
 ---
 
 ## 6. Gold Sales Genie (AI Assistant)
+
+<img width="2444" height="1184" alt="image" src="https://github.com/user-attachments/assets/eaf04956-9b7d-4364-ac4f-e46392f80919" />
 
 To enable natural-language access for business users, the project also includes a Databricks Genie AI assistant:
 
