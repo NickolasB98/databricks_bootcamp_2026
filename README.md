@@ -4,6 +4,7 @@ Modern end‑to‑end **lakehouse** project on Databricks that takes raw CRM and
 The solution uses the **Medallion architecture** (Bronze–Silver–Gold), orchestrated **Jobs** for automated pipelines, and a real‑time **SQL dashboard** on top of high‑quality Gold tables.  
 
 On top of this foundation, a **Gold Sales Genie** AI assistant is trained on the Gold schema so business users can ask natural‑language questions (e.g. “Which products drive revenue growth this quarter?”) and get answers directly from governed data.  
+
 This project demonstrates how to combine data engineering, analytics, and applied AI in a single Databricks lakehouse.
 
 ---
@@ -24,7 +25,6 @@ datasets/
 
 script/
   init_lakehouse.ipynb
-  Explore SalesDB.dbquery.ipynb
 
   bronze/
     Bronze layer (dictionary).ipynb
@@ -44,6 +44,7 @@ script/
     gold_dim_products.ipynb
     gold_fact_sales.ipynb
     gold_orchestration.ipynb
+    create_the_dashboard.sql
 
 datasets/
   engineering/
@@ -58,7 +59,7 @@ datasets/
 
 script/
   init_lakehouse.ipynb
-  Explore SalesDB.dbquery.ipynb
+  Gold Business Dashboard 
 
   bronze/
     Bronze layer (dictionary).ipynb
@@ -82,13 +83,19 @@ script/
     
 ## 2. Business Scenario
 
-This project simulates a retail company that collects data from two operational systems:
+A mid-sized retail company wants to move away from siloed CRM and ERP reports and build a single source of truth for sales and customer performance.  
+Today, sales, customer, product, and location data live in separate systems, making it hard to answer simple questions like “Which products drive revenue in each region?” or “Which customers are growing vs. declining?”.
 
-* CRM source: customer master data, product master data, and sales transactions.
+This project uses a **Databricks Lakehouse** to:
 
-* ERP source: locations and product hierarchy, used to enrich the CRM sales data.
+- Land raw CRM and ERP exports in a unified platform.  
+- Clean and standardize them into **Silver** tables that agree on keys, naming, and data types.  
+- Model a **Gold star schema** (`fact_sales`, `dim_customers`, `dim_products`, locations) that directly supports business KPIs.  
+- Power a **SQL-based sales dashboard** for real-time insights on revenue, top products, and key customers.  
+- Expose the Gold layer to a **Genie AI assistant**, so business users can ask natural‑language questions and get answers from governed, high‑quality data.
 
-The goal is to centralize these sources in a Databricks Lakehouse and expose clean, well-modeled tables for sales and customer performance reporting.
+The result is a realistic retail analytics environment that shows how modern teams can go from raw files to automated pipelines, dashboards, and AI-assisted self‑service analytics on one lakehouse platform.
+
 
 ## 3. Architecture Overview
 
@@ -134,7 +141,7 @@ Optimized for BI tools and ad‑hoc analytics.
   
 * Jobs for orchestration
 
-## 10. Jobs Orchestration
+## 5. Jobs Orchestration
 
 The full pipeline is orchestrated with a Databricks Job:
 
@@ -158,7 +165,7 @@ The Job runs these tasks in sequence: **Bronze → Silver → Gold → Sales_Das
 
 ---
 
-## 11. Gold Sales Genie (AI Assistant)
+## 6. Gold Sales Genie (AI Assistant)
 
 To enable natural-language access for business users, the project also includes a Databricks Genie AI assistant:
 
@@ -172,7 +179,7 @@ To enable natural-language access for business users, the project also includes 
   - “Describe recent trends in monthly sales.”  
 - Genie generates SQL on top of the curated Gold data, ensuring answers are based on high‑quality, governed tables rather than raw sources.
 
-### 11. About
+### 7. About
 
 Built by Nikolas Biniaris as a combined project for the Databricks Data Engineering and Data Analytics bootcamps, focusing on practical lakehouse architecture, SQL, and analytics for sales data.
 
