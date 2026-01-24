@@ -7,6 +7,8 @@ On top of this foundation, a **Gold Sales Genie** AI assistant is trained on the
 
 This project demonstrates how to combine data engineering, analytics, and applied AI in a single Databricks lakehouse.
 
+[Gold Business Dashboard 2026-01-24 22_58.pdf](https://github.com/user-attachments/files/24840502/Gold.Business.Dashboard.2026-01-24.22_58.pdf)
+
 ---
 
 ## 1. Repository Structure
