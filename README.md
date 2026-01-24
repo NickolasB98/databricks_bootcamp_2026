@@ -7,7 +7,7 @@ The project builds a Medallion architecture on top of CRM and ERP data to delive
 
 ## 1. Repository Structure
 
-
+```
 datasets/
   engineering/
     source_crm/
@@ -41,14 +41,48 @@ script/
     gold_dim_products.ipynb
     gold_fact_sales.ipynb
     gold_orchestration.ipynb
+datasets/
+  engineering/
+    source_crm/
+      cust_info.csv
+      prd_info.csv
+      sales_details.csv
+    source_erp/
+      CUST_AZ12.csv
+      LOC_A101.csv
+      PX_CAT_G1V2.csv
+
+script/
+  init_lakehouse.ipynb
+  Explore SalesDB.dbquery.ipynb
+
+  bronze/
+    Bronze layer (dictionary).ipynb
+    Bronze layer (hard-coded).ipynb
+
+  silver/
+    crm/
+      silver_crm_cust_info.ipynb
+      silver_crm_prd_info.ipynb
+      silver_crm_sales_details.ipynb
+    erp/
+      silver_orchestration.ipynb
+      silver_utils.py
+
+  gold/
+    gold_dim_customers.ipynb
+    gold_dim_products.ipynb
+    gold_fact_sales.ipynb
+    gold_orchestration.ipynb
+```
     
 ## 2. Business Scenario
 
 This project simulates a retail company that collects data from two operational systems:
 
-CRM source: customer master data, product master data, and sales transactions.
+* CRM source: customer master data, product master data, and sales transactions.
 
-ERP source: locations and product hierarchy, used to enrich the CRM sales data.
+* ERP source: locations and product hierarchy, used to enrich the CRM sales data.
 
 The goal is to centralize these sources in a Databricks Lakehouse and expose clean, well-modeled tables for sales and customer performance reporting.
 
@@ -74,11 +108,11 @@ Applies basic data quality checks.
 
 Builds a star schema with:
 
--- fact_sales
+- fact_sales
 
--- dim_customers
+- dim_customers
 
--- dim_products
+- dim_products
 
 ERP-based dimensions (e.g., locations, product categories)
 
