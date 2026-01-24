@@ -1,7 +1,10 @@
 # Databricks Lakehouse Bootcamp 2026 – Engineering & Analytics
 
-End-to-end Databricks lakehouse project that combines the **Data Engineering** and **Data Analytics** bootcamps into a single workflow.  
-The project builds a Medallion architecture on top of CRM and ERP data to deliver sales and customer analytics.
+Modern end‑to‑end **lakehouse** project on Databricks that takes raw CRM and ERP files and turns them into production‑style, analytics‑ready data products.  
+The solution uses the **Medallion architecture** (Bronze–Silver–Gold), orchestrated **Jobs** for automated pipelines, and a real‑time **SQL dashboard** on top of high‑quality Gold tables.  
+
+On top of this foundation, a **Gold Sales Genie** AI assistant is trained on the Gold schema so business users can ask natural‑language questions (e.g. “Which products drive revenue growth this quarter?”) and get answers directly from governed data.  
+This project demonstrates how to combine data engineering, analytics, and applied AI in a single Databricks lakehouse.
 
 ---
 
@@ -91,13 +94,13 @@ The goal is to centralize these sources in a Databricks Lakehouse and expose cle
 
 The solution follows the Medallion architecture:
 
-- Bronze layer
+### Bronze layer
 
 Raw ingestion of CSV files into Delta tables.
 
 Preserves original structure for traceability.
 
-- Silver layer
+### Silver layer
 
 Cleans and standardizes CRM and ERP data.
 
@@ -105,169 +108,71 @@ Handles types, null values, naming, and duplicates.
 
 Applies basic data quality checks.
 
-- Gold layer
+### Gold layer
 
 Builds a star schema with:
 
-- fact_sales
+* fact_sales
 
-- dim_customers
-
-- dim_products
+* dim_customers
+  
+* dim_products
 
 ERP-based dimensions (e.g., locations, product categories)
 
 Optimized for BI tools and ad‑hoc analytics.
 
-## 4. Engineering Track (Pipelines)
+## 4. Tech Stack
 
-### 4.1 Initialization
+* Databricks 
 
-Notebook: script/init_lakehouse.ipynb
+* PySpark & Spark SQL
 
-Configures catalog / schema for the project.
+* Delta Lake
 
-Sets storage locations (e.g., DBFS paths) for tables and checkpoints.
+* Databricks notebooks
+  
+* Jobs for orchestration
 
-Creates the base database used by all subsequent notebooks.
+## 10. Jobs Orchestration
 
-### 4.2 Bronze Layer
+The full pipeline is orchestrated with a Databricks Job:
 
-Notebooks:
+- **Bronze task**  
+  - Runs `script/bronze/Bronze layer (dictionary).ipynb`.  
+  - Ingests CRM and ERP CSV files into Bronze Delta tables using a parameterized dictionary.
 
-script/bronze/Bronze layer (dictionary).ipynb
+- **Silver task**  
+  - Runs `script/silver/erp/silver_orchestration.ipynb`.  
+  - Executes the Silver CRM notebooks and ERP transformations to produce cleaned, conformed tables.
 
-script/bronze/Bronze layer (hard-coded).ipynb
+- **Gold task**  
+  - Runs `script/gold/gold_orchestration.ipynb`.  
+  - Builds `dim_customers`, `dim_products`, and `fact_sales` in the Gold schema.
 
-These notebooks:
+- **Sales_Dashboard task**  
+  - Refreshes a Databricks SQL dashboard built on top of the Gold tables.  
+  - The dashboard uses SQL queries against `gold.fact_sales`, `gold.dim_customers`, and `gold.dim_products` to show revenue trends, top products, and key customer metrics.
 
-Ingest CSV files from datasets/engineering/source_crm and datasets/engineering/source_erp.
+The Job runs these tasks in sequence: **Bronze → Silver → Gold → Sales_Dashboard**.
 
-Load them into Bronze Delta tables.
+---
 
-Demonstrate two ingestion patterns:
+## 11. Gold Sales Genie (AI Assistant)
 
-Hard‑coded file paths.
+To enable natural-language access for business users, the project also includes a Databricks Genie AI assistant:
 
-Dictionary-driven configuration for reusable pipelines.
+- The **Gold Sales Genie** agent is connected to the three Gold tables:
+  - `gold.dim_products`
+  - `gold.dim_customers`
+  - `gold.fact_sales`
+- Business users can ask questions in plain English, for example:
+  - “What are the top 10 products by total sales amount this quarter?”  
+  - “Which customer segments generate the highest revenue?”  
+  - “Describe recent trends in monthly sales.”  
+- Genie generates SQL on top of the curated Gold data, ensuring answers are based on high‑quality, governed tables rather than raw sources.
 
-### 4.3 Silver Layer
-
-* CRM notebooks:
-
-script/silver/crm/silver_crm_cust_info.ipynb
-
-script/silver/crm/silver_crm_prd_info.ipynb
-
-script/silver/crm/silver_crm_sales_details.ipynb
-
-* ERP notebooks and utilities:
-
-script/silver/erp/silver_orchestration.ipynb
-
-script/silver/erp/silver_utils.py
-
-These components:
-
-Clean and standardize Bronze tables for customers, products, sales, locations, and product categories.
-
-Apply reusable checks defined in silver_utils.py (nulls, duplicates, valid ranges, etc.).
-
-Produce conformed Silver tables that are ready to be joined in the Gold layer.
-
-### 4.4 Gold Layer
-
-Notebooks:
-
-* script/gold/gold_dim_customers.ipynb
-
-* script/gold/gold_dim_products.ipynb
-
-* script/gold/gold_fact_sales.ipynb
-
-* script/gold/gold_orchestration.ipynb
-
-These notebooks:
-
-Build dimension tables for customers and products by combining CRM and ERP attributes.
-
-Build fact_sales by joining Silver CRM sales with ERP enrichment tables.
-
-Use gold_orchestration.ipynb to orchestrate creation of all Gold tables into a consistent star schema.
-
-### 5. Analytics Track
-   
-Notebook: script/Explore SalesDB.dbquery.ipynb
-
-This notebook focuses on business analysis on top of the Gold layer:
-
-Uses Spark SQL / Databricks SQL to query fact_sales and dimensions.
-
-Computes metrics such as:
-
-Revenue by date, product, customer, and location.
-
-Top‑selling products and top customers.
-
-Monthly and weekly sales trends.
-
-Provides example queries that can be turned into Databricks dashboards or exported to Tableau / Power BI.
-
-### 6. Tech Stack
-
-Databricks (Community or Workspace)
-
-PySpark & Spark SQL
-
-Delta Lake
-
-Databricks notebooks and (optionally) Jobs for orchestration
-
-### 7. How to Run
-
-Clone or import the repository
-
-Clone this repo locally or import it into Databricks Repos.
-
-Upload datasets
-
-Upload the contents of datasets/engineering to your Databricks workspace or DBFS.
-
-Update paths in the configuration cell if needed.
-
-Initialize the lakehouse
-
-Open script/init_lakehouse.ipynb.
-
-Set the database name and storage paths.
-
-Run all cells.
-
-Run the pipelines
-
-Run the Bronze notebooks.
-
-Run the Silver CRM and ERP notebooks.
-
-Run the Gold notebooks, or run gold_orchestration.ipynb to build all Gold tables.
-
-Explore the data
-
-Open script/Explore SalesDB.dbquery.ipynb.
-
-Execute the sample queries and adapt them to your own questions.
-
-### 8. Potential Extensions
-
-Add Databricks Jobs to schedule Bronze → Silver → Gold pipelines.
-
-Add richer data quality checks and monitoring.
-
-Connect Tableau or Power BI directly to the Gold tables.
-
-Extend the model with simple forecasting models for sales and demand.
-
-### 9. About
+### 11. About
 
 Built by Nikolas Biniaris as a combined project for the Databricks Data Engineering and Data Analytics bootcamps, focusing on practical lakehouse architecture, SQL, and analytics for sales data.
 
