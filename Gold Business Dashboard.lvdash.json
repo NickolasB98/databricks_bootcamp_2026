@@ -1,0 +1,1610 @@
+{
+  "datasets": [
+    {
+      "name": "edc664c5",
+      "displayName": "Monthly and Product Based Sales Analysis",
+      "queryLines": [
+        "-- Sales Trends Over Time (Monthly)\n",
+        "SELECT\n",
+        "  DATE_TRUNC('month', fs.order_date) AS month,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "GROUP BY month\n",
+        "ORDER BY month;\n",
+        "\n",
+        "-- Sales Trends Over Time by Category\n",
+        "SELECT\n",
+        "  DATE_TRUNC('month', fs.order_date) AS month,\n",
+        "  dp.category,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_products dp ON fs.product_key = dp.product_key\n",
+        "GROUP BY month, dp.category\n",
+        "ORDER BY month, total_sales DESC;\n",
+        "\n",
+        "-- Sales by Product Category & Subcategory\n",
+        "SELECT\n",
+        "  dp.category,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_products dp ON fs.product_key = dp.product_key\n",
+        "GROUP BY dp.category\n",
+        "ORDER BY total_sales DESC;\n",
+        "\n",
+        "-- Top Products by Sales\n",
+        "SELECT\n",
+        "  dp.product_name,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_products dp ON fs.product_key = dp.product_key\n",
+        "GROUP BY dp.product_name\n",
+        "ORDER BY total_sales DESC\n",
+        "LIMIT 10;\n",
+        "\n",
+        "-- Top Customers by Sales\n",
+        "SELECT\n",
+        "  dc.first_name || ' ' || dc.last_name AS customer,\n",
+        "  dc.country,\n",
+        "  dc.gender,\n",
+        "  dc.marital_status,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_customers dc ON fs.customer_key = dc.customer_key\n",
+        "GROUP BY dc.first_name || ' ' || dc.last_name, dc.country, dc.gender, dc.marital_status\n",
+        "ORDER BY total_sales DESC\n",
+        "LIMIT 10;\n",
+        "\n",
+        "-- Sales by Customer Demographics\n",
+        "SELECT\n",
+        "  dc.country,\n",
+        "  dc.gender,\n",
+        "  dc.marital_status,\n",
+        "  FLOOR(DATEDIFF(fs.order_date, dc.birthdate)/10)*10 AS age_group,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_customers dc ON fs.customer_key = dc.customer_key\n",
+        "GROUP BY dc.country, dc.gender, dc.marital_status, age_group\n",
+        "ORDER BY total_sales DESC;\n",
+        "\n",
+        "-- Average Order Value by Country\n",
+        "SELECT\n",
+        "  dc.country,\n",
+        "  AVG(fs.sales_amount) AS avg_order_value\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_customers dc ON fs.customer_key = dc.customer_key\n",
+        "GROUP BY dc.country\n",
+        "ORDER BY avg_order_value DESC;\n",
+        "\n",
+        "-- Product Performance by Maintenance Flag\n",
+        "SELECT\n",
+        "  dp.maintenance_flag,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_products dp ON fs.product_key = dp.product_key\n",
+        "GROUP BY dp.maintenance_flag\n",
+        "ORDER BY total_sales DESC;\n",
+        "\n",
+        "-- Order Fulfillment Analysis\n",
+        "SELECT\n",
+        "  AVG(DATEDIFF(fs.shipping_date, fs.order_date)) AS avg_shipping_days,\n",
+        "  COUNT(CASE WHEN fs.due_date < fs.shipping_date THEN 1 END) AS overdue_orders\n",
+        "FROM workspace.salesdb.fact_sales fs;"
+      ],
+      "catalog": "workspace",
+      "schema": "gold"
+    },
+    {
+      "name": "c81a1467",
+      "displayName": "Sales Insights by Month and Category",
+      "queryLines": [
+        "USE CATALOG `workspace`;\n",
+        "USE SCHEMA `gold`;\n",
+        "\n",
+        "-- Sales Trends Over Time (Monthly)\n",
+        "SELECT\n",
+        "  DATE_TRUNC('month', fs.order_date) AS month,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "GROUP BY month\n",
+        "ORDER BY month;\n",
+        "\n",
+        "-- Sales Trends Over Time by Category\n",
+        "SELECT\n",
+        "  DATE_TRUNC('month', fs.order_date) AS month,\n",
+        "  dp.category,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_products dp ON fs.product_key = dp.product_key\n",
+        "GROUP BY month, dp.category\n",
+        "ORDER BY month, total_sales DESC;\n",
+        "\n",
+        "-- Sales by Product Category & Subcategory\n",
+        "SELECT\n",
+        "  dp.category,\n",
+        "  dp.subcategory,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_products dp ON fs.product_key = dp.product_key\n",
+        "GROUP BY dp.category, dp.subcategory\n",
+        "ORDER BY total_sales DESC;\n",
+        "\n",
+        "-- Top Products by Sales\n",
+        "SELECT\n",
+        "  dp.product_name,\n",
+        "  SUM(fs.sales_amount) AS total_sales,\n",
+        "  SUM(fs.quantity) AS total_quantity\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_products dp ON fs.product_key = dp.product_key\n",
+        "GROUP BY dp.product_name\n",
+        "ORDER BY total_sales DESC\n",
+        "LIMIT 10;\n",
+        "\n",
+        "-- Top Customers by Sales\n",
+        "SELECT\n",
+        "  dc.first_name || ' ' || dc.last_name AS customer,\n",
+        "  dc.country,\n",
+        "  dc.gender,\n",
+        "  dc.marital_status,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_customers dc ON fs.customer_key = dc.customer_key\n",
+        "GROUP BY dc.first_name || ' ' || dc.last_name, dc.country, dc.gender, dc.marital_status\n",
+        "ORDER BY total_sales DESC\n",
+        "LIMIT 10;\n",
+        "\n",
+        "-- Sales by Customer Demographics\n",
+        "SELECT\n",
+        "  dc.country,\n",
+        "  dc.gender,\n",
+        "  dc.marital_status,\n",
+        "  FLOOR(DATEDIFF(fs.order_date, dc.birthdate)/10)*10 AS age_group,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_customers dc ON fs.customer_key = dc.customer_key\n",
+        "GROUP BY dc.country, dc.gender, dc.marital_status, age_group\n",
+        "ORDER BY total_sales DESC;\n",
+        "\n",
+        "-- Average Order Value by Segment (Country, Gender)\n",
+        "SELECT\n",
+        "  dc.country,\n",
+        "  dc.gender,\n",
+        "  AVG(fs.sales_amount) AS avg_order_value\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_customers dc ON fs.customer_key = dc.customer_key\n",
+        "GROUP BY dc.country, dc.gender\n",
+        "ORDER BY avg_order_value DESC;\n",
+        "\n",
+        "-- Product Performance by Maintenance Flag\n",
+        "SELECT\n",
+        "  dp.maintenance_flag,\n",
+        "  SUM(fs.sales_amount) AS total_sales,\n",
+        "  SUM(fs.quantity) AS total_quantity\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_products dp ON fs.product_key = dp.product_key\n",
+        "GROUP BY dp.maintenance_flag\n",
+        "ORDER BY total_sales DESC;\n",
+        "\n",
+        "-- Order Fulfillment Analysis\n",
+        "SELECT\n",
+        "  AVG(DATEDIFF(fs.shipping_date, fs.order_date)) AS avg_shipping_days,\n",
+        "  COUNT(CASE WHEN fs.due_date < fs.shipping_date THEN 1 END) AS overdue_orders\n",
+        "FROM workspace.salesdb.fact_sales fs;\n",
+        "\n",
+        "-- Sales Heatmap by Product Line and Country\n",
+        "SELECT\n",
+        "  dp.product_line,\n",
+        "  dc.country,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_products dp ON fs.product_key = dp.product_key\n",
+        "JOIN dim_customers dc ON fs.customer_key = dc.customer_key\n",
+        "GROUP BY dp.product_line, dc.country\n",
+        "ORDER BY dp.product_line, dc.country;"
+      ]
+    },
+    {
+      "name": "a10ef307",
+      "displayName": "Sales Insights Analysis Report",
+      "queryLines": [
+        "USE CATALOG `workspace`;\n",
+        "USE SCHEMA `gold`;\n",
+        "\n",
+        "-- Sales Trends Over Time (Monthly)\n",
+        "SELECT\n",
+        "  DATE_TRUNC('month', fs.order_date) AS month,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "GROUP BY month\n",
+        "ORDER BY month;\n",
+        "\n",
+        "-- Sales Trends Over Time by Category\n",
+        "SELECT\n",
+        "  DATE_TRUNC('month', fs.order_date) AS month,\n",
+        "  dp.category,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_products dp ON fs.product_key = dp.product_key\n",
+        "GROUP BY month, dp.category\n",
+        "ORDER BY month, total_sales DESC;\n",
+        "\n",
+        "-- Sales by Product Category & Subcategory\n",
+        "SELECT\n",
+        "  dp.category,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_products dp ON fs.product_key = dp.product_key\n",
+        "GROUP BY dp.category\n",
+        "ORDER BY total_sales DESC;\n",
+        "\n",
+        "-- Top Products by Sales\n",
+        "SELECT\n",
+        "  dp.product_name,\n",
+        "  SUM(fs.sales_amount) AS total_sales,\n",
+        "  SUM(fs.quantity) AS total_quantity\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_products dp ON fs.product_key = dp.product_key\n",
+        "GROUP BY dp.product_name\n",
+        "ORDER BY total_sales DESC\n",
+        "LIMIT 10;\n",
+        "\n",
+        "-- Top Customers by Sales\n",
+        "SELECT\n",
+        "  dc.first_name || ' ' || dc.last_name AS customer,\n",
+        "  dc.country,\n",
+        "  dc.gender,\n",
+        "  dc.marital_status,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_customers dc ON fs.customer_key = dc.customer_key\n",
+        "GROUP BY dc.first_name || ' ' || dc.last_name, dc.country, dc.gender, dc.marital_status\n",
+        "ORDER BY total_sales DESC\n",
+        "LIMIT 10;\n",
+        "\n",
+        "-- Sales by Customer Demographics\n",
+        "SELECT\n",
+        "  dc.country,\n",
+        "  dc.gender,\n",
+        "  dc.marital_status,\n",
+        "  FLOOR(DATEDIFF(fs.order_date, dc.birthdate)/10)*10 AS age_group,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_customers dc ON fs.customer_key = dc.customer_key\n",
+        "GROUP BY dc.country, dc.gender, dc.marital_status, age_group\n",
+        "ORDER BY total_sales DESC;\n",
+        "\n",
+        "-- Average Order Value by Segment (Country, Gender)\n",
+        "SELECT\n",
+        "  dc.country,\n",
+        "  dc.gender,\n",
+        "  AVG(fs.sales_amount) AS avg_order_value\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_customers dc ON fs.customer_key = dc.customer_key\n",
+        "GROUP BY dc.country, dc.gender\n",
+        "ORDER BY avg_order_value DESC;\n",
+        "\n",
+        "-- Product Performance by Maintenance Flag\n",
+        "SELECT\n",
+        "  dp.maintenance_flag,\n",
+        "  SUM(fs.sales_amount) AS total_sales,\n",
+        "  SUM(fs.quantity) AS total_quantity\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_products dp ON fs.product_key = dp.product_key\n",
+        "GROUP BY dp.maintenance_flag\n",
+        "ORDER BY total_sales DESC;\n",
+        "\n",
+        "-- Order Fulfillment Analysis\n",
+        "SELECT\n",
+        "  AVG(DATEDIFF(fs.shipping_date, fs.order_date)) AS avg_shipping_days,\n",
+        "  COUNT(CASE WHEN fs.due_date < fs.shipping_date THEN 1 END) AS overdue_orders\n",
+        "FROM workspace.salesdb.fact_sales fs;\n",
+        "\n",
+        "-- Sales Heatmap by Product Line and Country\n",
+        "SELECT\n",
+        "  dp.product_line,\n",
+        "  dc.country,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_products dp ON fs.product_key = dp.product_key\n",
+        "JOIN dim_customers dc ON fs.customer_key = dc.customer_key\n",
+        "GROUP BY dp.product_line, dc.country\n",
+        "ORDER BY dp.product_line, dc.country;"
+      ],
+      "catalog": "workspace",
+      "schema": "gold"
+    },
+    {
+      "name": "de09706f",
+      "displayName": "Sales Insights by Category and Month",
+      "queryLines": [
+        "USE CATALOG `workspace`;\n",
+        "USE SCHEMA `gold`;\n",
+        "\n",
+        "-- Sales Trends Over Time (Monthly)\n",
+        "SELECT\n",
+        "  DATE_TRUNC('month', fs.order_date) AS month,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "GROUP BY month\n",
+        "ORDER BY month;\n",
+        "\n",
+        "-- Sales Trends Over Time by Category\n",
+        "SELECT\n",
+        "  DATE_TRUNC('month', fs.order_date) AS month,\n",
+        "  dp.category,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_products dp ON fs.product_key = dp.product_key\n",
+        "GROUP BY month, dp.category\n",
+        "ORDER BY month, total_sales DESC;\n",
+        "\n",
+        "-- Sales by Product Category & Subcategory\n",
+        "SELECT\n",
+        "  dp.category,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_products dp ON fs.product_key = dp.product_key\n",
+        "GROUP BY dp.category\n",
+        "ORDER BY total_sales DESC;\n",
+        "\n",
+        "-- Top Products by Sales\n",
+        "SELECT\n",
+        "  dp.product_name,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_products dp ON fs.product_key = dp.product_key\n",
+        "GROUP BY dp.product_name\n",
+        "ORDER BY total_sales DESC\n",
+        "LIMIT 10;\n",
+        "\n",
+        "-- Top Customers by Sales\n",
+        "SELECT\n",
+        "  dc.first_name || ' ' || dc.last_name AS customer,\n",
+        "  dc.country,\n",
+        "  dc.gender,\n",
+        "  dc.marital_status,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_customers dc ON fs.customer_key = dc.customer_key\n",
+        "GROUP BY dc.first_name || ' ' || dc.last_name, dc.country, dc.gender, dc.marital_status\n",
+        "ORDER BY total_sales DESC\n",
+        "LIMIT 10;\n",
+        "\n",
+        "-- Sales by Customer Demographics\n",
+        "SELECT\n",
+        "  dc.country,\n",
+        "  dc.gender,\n",
+        "  dc.marital_status,\n",
+        "  FLOOR(DATEDIFF(fs.order_date, dc.birthdate)/10)*10 AS age_group,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_customers dc ON fs.customer_key = dc.customer_key\n",
+        "GROUP BY dc.country, dc.gender, dc.marital_status, age_group\n",
+        "ORDER BY total_sales DESC;\n",
+        "\n",
+        "-- Average Order Value by Segment (Country, Gender)\n",
+        "SELECT\n",
+        "  dc.country,\n",
+        "  dc.gender,\n",
+        "  AVG(fs.sales_amount) AS avg_order_value\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_customers dc ON fs.customer_key = dc.customer_key\n",
+        "GROUP BY dc.country, dc.gender\n",
+        "ORDER BY avg_order_value DESC;\n",
+        "\n",
+        "-- Product Performance by Maintenance Flag\n",
+        "SELECT\n",
+        "  dp.maintenance_flag,\n",
+        "  SUM(fs.sales_amount) AS total_sales,\n",
+        "  SUM(fs.quantity) AS total_quantity\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_products dp ON fs.product_key = dp.product_key\n",
+        "GROUP BY dp.maintenance_flag\n",
+        "ORDER BY total_sales DESC;\n",
+        "\n",
+        "-- Order Fulfillment Analysis\n",
+        "SELECT\n",
+        "  AVG(DATEDIFF(fs.shipping_date, fs.order_date)) AS avg_shipping_days,\n",
+        "  COUNT(CASE WHEN fs.due_date < fs.shipping_date THEN 1 END) AS overdue_orders\n",
+        "FROM workspace.salesdb.fact_sales fs;\n",
+        "\n",
+        "-- Sales Heatmap by Product Line and Country\n",
+        "SELECT\n",
+        "  dp.product_line,\n",
+        "  dc.country,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_products dp ON fs.product_key = dp.product_key\n",
+        "JOIN dim_customers dc ON fs.customer_key = dc.customer_key\n",
+        "GROUP BY dp.product_line, dc.country\n",
+        "ORDER BY dp.product_line, dc.country;"
+      ]
+    },
+    {
+      "name": "8485f62d",
+      "displayName": "Monthly and Category Sales Performance Insights",
+      "queryLines": [
+        "USE CATALOG `workspace`;\n",
+        "USE SCHEMA `gold`;\n",
+        "\n",
+        "-- Sales Trends Over Time (Monthly)\n",
+        "SELECT\n",
+        "  DATE_TRUNC('month', fs.order_date) AS month,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "GROUP BY month\n",
+        "ORDER BY month;\n",
+        "\n",
+        "-- Sales Trends Over Time by Category\n",
+        "SELECT\n",
+        "  DATE_TRUNC('month', fs.order_date) AS month,\n",
+        "  dp.category,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_products dp ON fs.product_key = dp.product_key\n",
+        "GROUP BY month, dp.category\n",
+        "ORDER BY month, total_sales DESC;\n",
+        "\n",
+        "-- Sales by Product Category & Subcategory\n",
+        "SELECT\n",
+        "  dp.category,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_products dp ON fs.product_key = dp.product_key\n",
+        "GROUP BY dp.category\n",
+        "ORDER BY total_sales DESC;\n",
+        "\n",
+        "-- Top Products by Sales\n",
+        "SELECT\n",
+        "  dp.product_name,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_products dp ON fs.product_key = dp.product_key\n",
+        "GROUP BY dp.product_name\n",
+        "ORDER BY total_sales DESC\n",
+        "LIMIT 10;\n",
+        "\n",
+        "-- Top Customers by Sales\n",
+        "SELECT\n",
+        "  dc.first_name || ' ' || dc.last_name AS customer,\n",
+        "  dc.country,\n",
+        "  dc.gender,\n",
+        "  dc.marital_status,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_customers dc ON fs.customer_key = dc.customer_key\n",
+        "GROUP BY dc.first_name || ' ' || dc.last_name, dc.country, dc.gender, dc.marital_status\n",
+        "ORDER BY total_sales DESC\n",
+        "LIMIT 10;\n",
+        "\n",
+        "-- Sales by Customer Demographics\n",
+        "SELECT\n",
+        "  dc.country,\n",
+        "  dc.gender,\n",
+        "  dc.marital_status,\n",
+        "  FLOOR(DATEDIFF(fs.order_date, dc.birthdate)/10)*10 AS age_group,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_customers dc ON fs.customer_key = dc.customer_key\n",
+        "GROUP BY dc.country, dc.gender, dc.marital_status, age_group\n",
+        "ORDER BY total_sales DESC;\n",
+        "\n",
+        "-- Average Order Value by Country\n",
+        "SELECT\n",
+        "  dc.country,\n",
+        "  AVG(fs.sales_amount) AS avg_order_value\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_customers dc ON fs.customer_key = dc.customer_key\n",
+        "GROUP BY dc.country\n",
+        "ORDER BY avg_order_value DESC;\n",
+        "\n",
+        "-- Product Performance by Maintenance Flag\n",
+        "SELECT\n",
+        "  dp.maintenance_flag,\n",
+        "  SUM(fs.sales_amount) AS total_sales,\n",
+        "  SUM(fs.quantity) AS total_quantity\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_products dp ON fs.product_key = dp.product_key\n",
+        "GROUP BY dp.maintenance_flag\n",
+        "ORDER BY total_sales DESC;\n",
+        "\n",
+        "-- Order Fulfillment Analysis\n",
+        "SELECT\n",
+        "  AVG(DATEDIFF(fs.shipping_date, fs.order_date)) AS avg_shipping_days,\n",
+        "  COUNT(CASE WHEN fs.due_date < fs.shipping_date THEN 1 END) AS overdue_orders\n",
+        "FROM workspace.salesdb.fact_sales fs;\n",
+        "\n",
+        "-- Sales Heatmap by Product Line and Country\n",
+        "SELECT\n",
+        "  dp.product_line,\n",
+        "  dc.country,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_products dp ON fs.product_key = dp.product_key\n",
+        "JOIN dim_customers dc ON fs.customer_key = dc.customer_key\n",
+        "GROUP BY dp.product_line, dc.country\n",
+        "ORDER BY dp.product_line, dc.country;"
+      ]
+    },
+    {
+      "name": "2109f847",
+      "displayName": "Sales Insights and Trends Analysis",
+      "queryLines": [
+        "USE CATALOG `workspace`;\n",
+        "USE SCHEMA `gold`;\n",
+        "\n",
+        "-- Sales Trends Over Time (Monthly)\n",
+        "SELECT\n",
+        "  DATE_TRUNC('month', fs.order_date) AS month,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "GROUP BY month\n",
+        "ORDER BY month;\n",
+        "\n",
+        "-- Sales Trends Over Time by Category\n",
+        "SELECT\n",
+        "  DATE_TRUNC('month', fs.order_date) AS month,\n",
+        "  dp.category,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_products dp ON fs.product_key = dp.product_key\n",
+        "GROUP BY month, dp.category\n",
+        "ORDER BY month, total_sales DESC;\n",
+        "\n",
+        "-- Sales by Product Category & Subcategory\n",
+        "SELECT\n",
+        "  dp.category,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_products dp ON fs.product_key = dp.product_key\n",
+        "GROUP BY dp.category\n",
+        "ORDER BY total_sales DESC;\n",
+        "\n",
+        "-- Top Products by Sales\n",
+        "SELECT\n",
+        "  dp.product_name,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_products dp ON fs.product_key = dp.product_key\n",
+        "GROUP BY dp.product_name\n",
+        "ORDER BY total_sales DESC\n",
+        "LIMIT 10;\n",
+        "\n",
+        "-- Top Customers by Sales\n",
+        "SELECT\n",
+        "  dc.first_name || ' ' || dc.last_name AS customer,\n",
+        "  dc.country,\n",
+        "  dc.gender,\n",
+        "  dc.marital_status,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_customers dc ON fs.customer_key = dc.customer_key\n",
+        "GROUP BY dc.first_name || ' ' || dc.last_name, dc.country, dc.gender, dc.marital_status\n",
+        "ORDER BY total_sales DESC\n",
+        "LIMIT 10;\n",
+        "\n",
+        "-- Sales by Customer Demographics\n",
+        "SELECT\n",
+        "  dc.country,\n",
+        "  dc.gender,\n",
+        "  dc.marital_status,\n",
+        "  FLOOR(DATEDIFF(fs.order_date, dc.birthdate)/10)*10 AS age_group,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_customers dc ON fs.customer_key = dc.customer_key\n",
+        "GROUP BY dc.country, dc.gender, dc.marital_status, age_group\n",
+        "ORDER BY total_sales DESC;\n",
+        "\n",
+        "-- Average Order Value by Country\n",
+        "SELECT\n",
+        "  dc.country,\n",
+        "  AVG(fs.sales_amount) AS avg_order_value\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_customers dc ON fs.customer_key = dc.customer_key\n",
+        "GROUP BY dc.country\n",
+        "ORDER BY avg_order_value DESC;\n",
+        "\n",
+        "-- Product Performance by Maintenance Flag\n",
+        "SELECT\n",
+        "  dp.maintenance_flag,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_products dp ON fs.product_key = dp.product_key\n",
+        "GROUP BY dp.maintenance_flag\n",
+        "ORDER BY total_sales DESC;\n",
+        "\n",
+        "-- Order Fulfillment Analysis\n",
+        "SELECT\n",
+        "  AVG(DATEDIFF(fs.shipping_date, fs.order_date)) AS avg_shipping_days,\n",
+        "  COUNT(CASE WHEN fs.due_date < fs.shipping_date THEN 1 END) AS overdue_orders\n",
+        "FROM workspace.salesdb.fact_sales fs;\n",
+        "\n",
+        "-- Sales Heatmap by Product Line and Country\n",
+        "SELECT\n",
+        "  dp.product_line,\n",
+        "  dc.country,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_products dp ON fs.product_key = dp.product_key\n",
+        "JOIN dim_customers dc ON fs.customer_key = dc.customer_key\n",
+        "GROUP BY dp.product_line, dc.country\n",
+        "ORDER BY dp.product_line, dc.country;"
+      ]
+    },
+    {
+      "name": "f7784981",
+      "displayName": "Sales Insights by Category and Timeframe",
+      "queryLines": [
+        "USE CATALOG `workspace`;\n",
+        "USE SCHEMA `gold`;\n",
+        "\n",
+        "-- Sales Trends Over Time (Monthly)\n",
+        "SELECT\n",
+        "  DATE_TRUNC('month', fs.order_date) AS month,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "GROUP BY month\n",
+        "ORDER BY month;\n",
+        "\n",
+        "-- Sales Trends Over Time by Category\n",
+        "SELECT\n",
+        "  DATE_TRUNC('month', fs.order_date) AS month,\n",
+        "  dp.category,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_products dp ON fs.product_key = dp.product_key\n",
+        "GROUP BY month, dp.category\n",
+        "ORDER BY month, total_sales DESC;\n",
+        "\n",
+        "-- Sales by Product Category & Subcategory\n",
+        "SELECT\n",
+        "  dp.category,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_products dp ON fs.product_key = dp.product_key\n",
+        "GROUP BY dp.category\n",
+        "ORDER BY total_sales DESC;\n",
+        "\n",
+        "-- Top Products by Sales\n",
+        "SELECT\n",
+        "  dp.product_name,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_products dp ON fs.product_key = dp.product_key\n",
+        "GROUP BY dp.product_name\n",
+        "ORDER BY total_sales DESC\n",
+        "LIMIT 10;\n",
+        "\n",
+        "-- Top Customers by Sales\n",
+        "SELECT\n",
+        "  dc.first_name || ' ' || dc.last_name AS customer,\n",
+        "  dc.country,\n",
+        "  dc.gender,\n",
+        "  dc.marital_status,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_customers dc ON fs.customer_key = dc.customer_key\n",
+        "GROUP BY dc.first_name || ' ' || dc.last_name, dc.country, dc.gender, dc.marital_status\n",
+        "ORDER BY total_sales DESC\n",
+        "LIMIT 10;\n",
+        "\n",
+        "-- Sales by Customer Demographics\n",
+        "SELECT\n",
+        "  dc.country,\n",
+        "  dc.gender,\n",
+        "  dc.marital_status,\n",
+        "  FLOOR(DATEDIFF(fs.order_date, dc.birthdate)/10)*10 AS age_group,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_customers dc ON fs.customer_key = dc.customer_key\n",
+        "GROUP BY dc.country, dc.gender, dc.marital_status, age_group\n",
+        "ORDER BY total_sales DESC;\n",
+        "\n",
+        "-- Average Order Value by Country\n",
+        "SELECT\n",
+        "  dc.country,\n",
+        "  AVG(fs.sales_amount) AS avg_order_value\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_customers dc ON fs.customer_key = dc.customer_key\n",
+        "GROUP BY dc.country\n",
+        "ORDER BY avg_order_value DESC;\n",
+        "\n",
+        "-- Product Performance by Maintenance Flag\n",
+        "SELECT\n",
+        "  dp.maintenance_flag,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_products dp ON fs.product_key = dp.product_key\n",
+        "GROUP BY dp.maintenance_flag\n",
+        "ORDER BY total_sales DESC;\n",
+        "\n",
+        "-- Order Fulfillment Analysis\n",
+        "SELECT\n",
+        "  AVG(DATEDIFF(fs.shipping_date, fs.order_date)) AS avg_shipping_days,\n",
+        "  COUNT(CASE WHEN fs.due_date < fs.shipping_date THEN 1 END) AS overdue_orders\n",
+        "FROM workspace.salesdb.fact_sales fs;\n",
+        "\n",
+        "-- Sales Heatmap by Product Line and Country\n",
+        "SELECT\n",
+        "  dp.product_line,\n",
+        "  dc.country,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_products dp ON fs.product_key = dp.product_key\n",
+        "JOIN dim_customers dc ON fs.customer_key = dc.customer_key\n",
+        "GROUP BY dp.product_line, dc.country\n",
+        "ORDER BY dp.product_line, dc.country;"
+      ]
+    },
+    {
+      "name": "d1ebd481",
+      "displayName": "fact_sales",
+      "queryLines": [
+        "SELECT * FROM workspace.salesdb.fact_sales"
+      ]
+    },
+    {
+      "name": "99ddaf6f",
+      "displayName": "dim_products",
+      "queryLines": [
+        "SELECT * FROM workspace.salesdb.dim_products"
+      ]
+    },
+    {
+      "name": "04d8c3b1",
+      "displayName": "dim_customers",
+      "queryLines": [
+        "SELECT * FROM workspace.salesdb.dim_customers"
+      ]
+    },
+    {
+      "name": "e7892cdf",
+      "displayName": "Sales Trends over Time",
+      "queryLines": [
+        "-- Sales Trends Over Time (Monthly)\n",
+        "SELECT\n",
+        "  DATE_TRUNC('month', fs.order_date) AS month,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "GROUP BY month\n",
+        "ORDER BY month;"
+      ],
+      "catalog": "workspace",
+      "schema": "gold"
+    },
+    {
+      "name": "4d3950b5",
+      "displayName": "Sales Insights by Category Over Time",
+      "queryLines": [
+        "-- Sales Trends Over Time by Category\n",
+        "SELECT\n",
+        "  DATE_TRUNC('month', fs.order_date) AS month,\n",
+        "  dp.category,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_products dp ON fs.product_key = dp.product_key\n",
+        "GROUP BY month, dp.category\n",
+        "ORDER BY month, total_sales DESC;"
+      ],
+      "catalog": "workspace",
+      "schema": "gold"
+    },
+    {
+      "name": "94f43ead",
+      "displayName": "Sales by Product Category",
+      "queryLines": [
+        "-- Sales by Product Category\n",
+        "SELECT\n",
+        "  dp.category,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_products dp ON fs.product_key = dp.product_key\n",
+        "GROUP BY dp.category\n",
+        "ORDER BY total_sales DESC;"
+      ],
+      "catalog": "workspace",
+      "schema": "gold"
+    },
+    {
+      "name": "b7449a06",
+      "displayName": "Top Products by Sales",
+      "queryLines": [
+        "-- Top Products by Sales\n",
+        "SELECT\n",
+        "  dp.product_name,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_products dp ON fs.product_key = dp.product_key\n",
+        "GROUP BY dp.product_name\n",
+        "ORDER BY total_sales DESC\n",
+        "LIMIT 10;"
+      ],
+      "catalog": "workspace",
+      "schema": "gold"
+    },
+    {
+      "name": "752a8fda",
+      "displayName": "Top Customers by Sales",
+      "queryLines": [
+        "-- Top Customers by Sales\n",
+        "SELECT\n",
+        "  dc.first_name || ' ' || dc.last_name AS customer,\n",
+        "  dc.country,\n",
+        "  dc.gender,\n",
+        "  dc.marital_status,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_customers dc ON fs.customer_key = dc.customer_key\n",
+        "GROUP BY dc.first_name || ' ' || dc.last_name, dc.country, dc.gender, dc.marital_status\n",
+        "ORDER BY total_sales DESC\n",
+        "LIMIT 10;"
+      ],
+      "catalog": "workspace",
+      "schema": "gold"
+    },
+    {
+      "name": "8d5a74a3",
+      "displayName": "Average Order Value by Country",
+      "queryLines": [
+        "-- Average Order Value by Country\n",
+        "SELECT\n",
+        "  dc.country,\n",
+        "  AVG(fs.sales_amount) AS avg_order_value\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_customers dc ON fs.customer_key = dc.customer_key\n",
+        "GROUP BY dc.country\n",
+        "ORDER BY avg_order_value DESC;"
+      ],
+      "catalog": "workspace",
+      "schema": "gold"
+    },
+    {
+      "name": "80f825d7",
+      "displayName": "Order Fulfillment Analysis",
+      "queryLines": [
+        "-- Order Fulfillment Analysis\n",
+        "SELECT\n",
+        "  AVG(DATEDIFF(fs.shipping_date, fs.order_date)) AS avg_shipping_days,\n",
+        "  COUNT(CASE WHEN fs.due_date < fs.shipping_date THEN 1 END) AS overdue_orders\n",
+        "FROM workspace.salesdb.fact_sales fs;"
+      ],
+      "catalog": "workspace",
+      "schema": "gold"
+    },
+    {
+      "name": "b0ae7a41",
+      "displayName": "Sales Insights by Maintenance Status",
+      "queryLines": [
+        "-- Product Performance by Maintenance Flag\n",
+        "SELECT\n",
+        "  dp.maintenance_flag,\n",
+        "  SUM(fs.sales_amount) AS total_sales\n",
+        "FROM workspace.salesdb.fact_sales fs\n",
+        "JOIN dim_products dp ON fs.product_key = dp.product_key\n",
+        "GROUP BY dp.maintenance_flag\n",
+        "ORDER BY total_sales DESC;"
+      ],
+      "catalog": "workspace",
+      "schema": "gold"
+    }
+  ],
+  "pages": [
+    {
+      "name": "df381b7c",
+      "displayName": "Sales Dashboard",
+      "layout": [
+        {
+          "widget": {
+            "name": "sales-trends-over-time",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "e7892cdf",
+                  "fields": [
+                    {
+                      "name": "monthly(month)",
+                      "expression": "DATE_TRUNC(\"MONTH\", `month`)"
+                    },
+                    {
+                      "name": "sum(total_sales)",
+                      "expression": "SUM(`total_sales`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "monthly(month)",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(total_sales)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "frame": {
+                "title": "Sales Trends Over Time",
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 1,
+            "width": 6,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "sales-by-category",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "4d3950b5",
+                  "fields": [
+                    {
+                      "name": "category",
+                      "expression": "`category`"
+                    },
+                    {
+                      "name": "month",
+                      "expression": "`month`"
+                    },
+                    {
+                      "name": "sum(total_sales)",
+                      "expression": "SUM(`total_sales`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "month",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(total_sales)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "category",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "frame": {
+                "title": "Sales over time, coloured by category",
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 5,
+            "width": 6,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "total-sales-product-category-1",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "94f43ead",
+                  "fields": [
+                    {
+                      "name": "category",
+                      "expression": "`category`"
+                    },
+                    {
+                      "name": "sum(total_sales)",
+                      "expression": "SUM(`total_sales`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "category",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "y-reversed"
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(total_sales)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "frame": {
+                "title": "Total Sales by Product Category",
+                "showTitle": true
+              },
+              "mark": {
+                "colors": [
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 9,
+            "width": 6,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "total-sales-by-product-1",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "b7449a06",
+                  "fields": [
+                    {
+                      "name": "sum(total_sales)",
+                      "expression": "SUM(`total_sales`)"
+                    },
+                    {
+                      "name": "product_name",
+                      "expression": "`product_name`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "sum(total_sales)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "product_name",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "x-reversed"
+                    }
+                  }
+                }
+              },
+              "frame": {
+                "title": "Total Sales by Product",
+                "showTitle": true
+              },
+              "mark": {
+                "colors": [
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 14,
+            "width": 3,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "table-top-customers-sales",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "752a8fda",
+                  "fields": [
+                    {
+                      "name": "country",
+                      "expression": "`country`"
+                    },
+                    {
+                      "name": "total_sales",
+                      "expression": "`total_sales`"
+                    },
+                    {
+                      "name": "customer",
+                      "expression": "`customer`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "total_sales",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "customer",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "color": {
+                  "fieldName": "country",
+                  "scale": {
+                    "type": "categorical",
+                    "mappings": [
+                      {
+                        "value": "France",
+                        "color": {
+                          "themeColorType": "visualizationColors",
+                          "position": 4
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              "frame": {
+                "title": "Top Customers by Sales",
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 14,
+            "width": 3,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "average-order-value-by-country",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "8d5a74a3",
+                  "fields": [
+                    {
+                      "name": "country",
+                      "expression": "`country`"
+                    },
+                    {
+                      "name": "avg(avg_order_value)",
+                      "expression": "AVG(`avg_order_value`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "country",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "y-reversed"
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "avg(avg_order_value)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "frame": {
+                "title": "Average Order Value by Country",
+                "showTitle": true
+              },
+              "mark": {
+                "colors": [
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 19,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "total-overdue-orders",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "80f825d7",
+                  "fields": [
+                    {
+                      "name": "avg_shipping_days",
+                      "expression": "`avg_shipping_days`"
+                    },
+                    {
+                      "name": "overdue_orders",
+                      "expression": "`overdue_orders`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 1,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "avg_shipping_days",
+                    "title": "avg_shipping_days",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "type": "float",
+                    "displayAs": "number"
+                  },
+                  {
+                    "fieldName": "overdue_orders",
+                    "title": "overdue_orders",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "type": "integer",
+                    "displayAs": "number"
+                  }
+                ]
+              },
+              "invisibleColumns": [],
+              "allowHTMLByDefault": false,
+              "itemsPerPage": 25,
+              "paginationSize": "default",
+              "condensed": true,
+              "withRowNumber": false,
+              "frame": {
+                "title": "Order Fulfillment Analysis",
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 25,
+            "width": 6,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "sales-maintenance-status",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "b0ae7a41",
+                  "fields": [
+                    {
+                      "name": "sum(total_sales)",
+                      "expression": "SUM(`total_sales`)"
+                    },
+                    {
+                      "name": "maintenance_flag",
+                      "expression": "`maintenance_flag`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {
+                  "fieldName": "sum(total_sales)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "maintenance_flag",
+                  "scale": {
+                    "type": "categorical",
+                    "mappings": [
+                      {
+                        "value": true,
+                        "color": {
+                          "themeColorType": "visualizationColors",
+                          "position": 3
+                        }
+                      },
+                      {
+                        "value": false,
+                        "color": {
+                          "themeColorType": "visualizationColors",
+                          "position": 4
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              "frame": {
+                "title": "Sales by Maintenance Status",
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 27,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "8993286c",
+            "multilineTextboxSpec": {
+              "lines": [
+                "<span style=\"text-align:center;display:block;\"><span style=\"font-size: 32px;color: #FF3621;\">Golden Business Sales Dashboard</span></span>"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 6,
+            "height": 1
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS"
+    },
+    {
+      "name": "fbac882f",
+      "displayName": "Global Filters",
+      "layout": [
+        {
+          "widget": {
+            "name": "6da54d26",
+            "queries": [
+              {
+                "name": "dashboards/01f0f96ce86f1635a9db5ffe896ed02c/datasets/01f0f970d47617c1b52164bff8f06ef1_month",
+                "query": {
+                  "datasetName": "e7892cdf",
+                  "fields": [
+                    {
+                      "name": "month",
+                      "expression": "`month`"
+                    },
+                    {
+                      "name": "month_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-date-range-picker",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "month",
+                    "queryName": "dashboards/01f0f96ce86f1635a9db5ffe896ed02c/datasets/01f0f970d47617c1b52164bff8f06ef1_month"
+                  }
+                ]
+              },
+              "selection": {
+                "defaultSelection": {
+                  "range": {
+                    "dataType": "DATETIME",
+                    "min": {
+                      "value": "2010-12-01T23:27:45.000"
+                    },
+                    "max": {
+                      "value": "2014-01-01T23:27:26.999"
+                    }
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "showDescription": false
+              }
+            },
+            "specExtensions": {
+              "widgetBackgroundColor": {
+                "dark": "#571818"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 2
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_GLOBAL_FILTERS"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}
