@@ -31,7 +31,7 @@ datasets/
       LOC_A101.csv
       PX_CAT_G1V2.csv
 
-  script/
+script/
     init_lakehouse.ipynb
 
   bronze/
