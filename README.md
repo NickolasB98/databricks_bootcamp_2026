@@ -2,7 +2,7 @@
 
 Modern end‑to‑end **lakehouse** project on Databricks that takes raw CRM and ERP files and turns them into production‑style, analytics‑ready data products.
 
-The solution uses the **Medallion architecture** (Bronze–Silver–Gold), orchestrated **Jobs** for automated pipelines, and a real‑time **SQL dashboard** on top of high‑quality Gold tables.  
+The solution uses the **Medallion architecture** (Bronze–Silver–Gold), orchestrated **Jobs** for running the pipeline every day, along with a **SQL-based dashboard** on top of high‑quality Gold tables that also gets refreshed with new data.  
 
 On top of this foundation, a **Gold Sales Genie** AI assistant is trained on the Gold schema so business users can ask natural‑language questions (e.g. “Which products drive revenue growth this quarter?”) and get answers directly from governed data.  
 
