@@ -145,6 +145,8 @@ The Job runs these tasks in sequence: **Bronze → Silver → Gold → Sales_Das
 
 <img width="2444" height="1184" alt="image" src="https://github.com/user-attachments/assets/eaf04956-9b7d-4364-ac4f-e46392f80919" />
 
+https://dbc-5185dc69-5189.cloud.databricks.com/genie/rooms/01f0f974f6ca1207afc7e2f52cfeb2e6?o=7474651059184767
+
 To enable natural-language access for business users, the project also includes a Databricks Genie AI assistant:
 
 - The **Gold Sales Genie** agent is connected to the three Gold tables:
