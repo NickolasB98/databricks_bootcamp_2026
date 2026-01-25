@@ -31,9 +31,6 @@ datasets/
       LOC_A101.csv
       PX_CAT_G1V2.csv
 
-script/
-  init_lakehouse.ipynb
-
   bronze/
     Bronze layer (dictionary).ipynb
     Bronze layer (hard-coded).ipynb
