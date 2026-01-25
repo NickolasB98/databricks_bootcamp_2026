@@ -31,40 +31,8 @@ datasets/
       LOC_A101.csv
       PX_CAT_G1V2.csv
 
-  bronze/
-    Bronze layer (dictionary).ipynb
-    Bronze layer (hard-coded).ipynb
-
-  silver/
-    crm/
-      silver_crm_cust_info.ipynb
-      silver_crm_prd_info.ipynb
-      silver_crm_sales_details.ipynb
-    erp/
-      silver_orchestration.ipynb
-      silver_utils.py
-
-  gold/
-    gold_dim_customers.ipynb
-    gold_dim_products.ipynb
-    gold_fact_sales.ipynb
-    gold_orchestration.ipynb
-    create_the_dashboard.sql
-
-datasets/
-  engineering/
-    source_crm/
-      cust_info.csv
-      prd_info.csv
-      sales_details.csv
-    source_erp/
-      CUST_AZ12.csv
-      LOC_A101.csv
-      PX_CAT_G1V2.csv
-
-script/
-  init_lakehouse.ipynb
-  Gold Business Dashboard 
+  script/
+    init_lakehouse.ipynb
 
   bronze/
     Bronze layer (dictionary).ipynb
@@ -83,7 +51,8 @@ script/
     gold_dim_customers.ipynb
     gold_dim_products.ipynb
     gold_fact_sales.ipynb
-    gold_orchestration.ipynb
+ 
+
 ```
     
 ## 2. Business Scenario
