@@ -1,5 +1,7 @@
 # Databricks Lakehouse Bootcamp 2026 – Sales CRM & ERP Data Lakehouse
 
+<img width="1024" height="796" alt="image" src="https://github.com/user-attachments/assets/4b20ab3f-fb96-49dc-a6a8-2c206b270e79" />
+
 Modern end‑to‑end **lakehouse** project on Databricks that takes raw CRM and ERP files and turns them into production‑style, analytics‑ready data products.
 
 The solution uses the **Medallion architecture** (Bronze–Silver–Gold), orchestrated **Jobs** for running the pipeline every day, along with a **SQL-based dashboard** on top of high‑quality Gold tables that also gets refreshed with new data.  
