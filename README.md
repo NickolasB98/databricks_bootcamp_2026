@@ -51,7 +51,7 @@ datasets/
     gold_dim_customers.ipynb
     gold_dim_products.ipynb
     gold_fact_sales.ipynb
- 
+    gold_orchestration.ipynb
 
 ```
     
